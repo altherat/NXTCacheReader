@@ -31,3 +31,34 @@ Dictionary<int, Definition.Item> itemDefinitions = cacheReader.LoadDefinitions<D
 ```
 
 CacheReader implements its own cache system to make subsequent definition retrieval faster.
+
+## Support
+Currently only some of the cache is recognized and supported.
+
+##### Objects
+- Actions
+- Name
+
+##### Npcs
+- Actions
+- Combat level
+- Is clickable
+- Is visible
+- Name
+
+##### Items
+- Actions
+- Cosmetic ID
+- Cosmetic template ID
+- Ground actions
+- Is cosmetic
+- Is lent
+- Is members
+- Is noted
+- Is stackable
+- Is tradeable
+- Lent ID
+- Lent template ID
+- Name
+- Note ID
+- Note template ID
