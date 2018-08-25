@@ -1050,12 +1050,10 @@ namespace NXTCacheReader
             internal void CopyFromTemplate(Item template)
             {
                 Actions = template.Actions;
-                GroundActions = template.GroundActions;
+                DestroyText = template.DestroyText;
                 IsMembers = template.IsMembers;
-                IsStackable = template.IsStackable;
                 IsTradeable = template.IsTradeable;
                 Name = template.Name;
-            }
         }
 
     }
