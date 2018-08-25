@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,13 +19,13 @@ namespace NXTCacheReader
 
         internal abstract void Deserialize(CacheReader cacheReader, byte[] bytes);
 
-        internal class Object : Definition
+        public class Object : Definition
         {
 
             public string Name;
             public string[] Actions;
 
-            public Object(int id) : base(id)
+            internal Object(int id) : base(id)
             {
             }
 
@@ -370,7 +370,7 @@ namespace NXTCacheReader
 
         }
 
-        internal class Npc : Definition
+        public class Npc : Definition
         {
 
             public string[] Actions;
@@ -379,7 +379,7 @@ namespace NXTCacheReader
             public bool IsClickable;
             public bool IsVisible;
 
-            public Npc(int id) : base(id)
+            internal Npc(int id) : base(id)
             {
             }
 
@@ -676,8 +676,8 @@ namespace NXTCacheReader
                 }
             }
         }
-        
-        internal class Item : Definition
+
+        public class Item : Definition
         {
 
             public string[] Actions;
@@ -696,7 +696,7 @@ namespace NXTCacheReader
             public int LentId = -1;
             public int LentTemplateId = -1;
 
-            public Item(int id) : base(id)
+            internal Item(int id) : base(id)
             {
             }
 
