@@ -19,10 +19,13 @@ namespace NXTCacheReader
         public class Object : Definition
         {
 
-            public string Name;
             public string[] Actions;
+            public int Height;
+            public bool IsWalkable;
+            public string Name;
+            public int Width;
 
-            internal Object(int id) : base(id)
+            public Object(int id) : base(id)
             {
             }
 
@@ -55,16 +58,16 @@ namespace NXTCacheReader
                                 Name = cacheReader.ReadString(stream);
                                 break;
                             case 14:
-                                byte width = cacheReader.ReadUByte(stream);
+                                Width = cacheReader.ReadUByte(stream);
                                 break;
                             case 15:
-                                byte height = cacheReader.ReadUByte(stream);
+                                Height = cacheReader.ReadUByte(stream);
                                 break;
                             case 17:
-                                bool isWalkable = false;
+                                IsWalkable = false;
                                 break;
                             case 18:
-                                isWalkable = false;
+                                IsWalkable = false;
                                 break;
                             case 19:
                                 byte type19 = cacheReader.ReadUByte(stream);
@@ -155,7 +158,7 @@ namespace NXTCacheReader
                             case 73:
                                 break;
                             case 74:
-                                bool isWalkable2 = true;
+                                IsWalkable = true;
                                 break;
                             case 75:
                                 byte unknown75 = cacheReader.ReadByte(stream);
@@ -371,12 +374,12 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
-            public string Name;
             public int CombatLevel;
             public bool IsClickable;
             public bool IsVisible;
+            public string Name;
 
-            internal Npc(int id) : base(id)
+            public Npc(int id) : base(id)
             {
             }
 
@@ -678,22 +681,36 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
-            public string[] GroundActions;
-            public string Name;
-            public bool IsMembers;
-            public bool IsStackable;
-            public bool IsTradeable;
-            public bool IsNoted => NoteTemplateId != -1;
-            public bool IsCosmetic => CosmeticTemplateId != -1;
-            public bool IsLent => LentTemplateId != -1;
-            public int NoteId = -1;
-            public int NoteTemplateId = -1;
+            public int AttackSpeed = -1;
             public int CosmeticId = -1;
             public int CosmeticTemplateId = -1;
+            public string DestroyText;
+            public int DropSoundId = -1;
+            public string[] EquipActions;
+            public int EquipSlotId = -1;
+            public int EquipSoundId = -1;
+            public string[] GroundActions;
+            public bool IsAlchable = true;
+            public bool IsBankable = true;
+            public bool IsCosmetic => CosmeticTemplateId != -1;
+            public bool IsLent => LentTemplateId != -1;
+            public bool IsMembers;
+            public bool IsNoted => NoteTemplateId != -1;
+            public bool IsStackable;
+            public bool IsTradeable;
             public int LentId = -1;
             public int LentTemplateId = -1;
+            public int ModelId = -1;
+            public int ModelZoom = -1;
+            public string Name;
+            public int NoteId = -1;
+            public int NoteTemplateId = -1;
+            public int PrayerBonus = -1;
+            public int RepairCost = -1;
+            public int TreasureHunterCashOutValue;
+            public string TreasureHunterText;
 
-            internal Item(int id) : base(id)
+            public Item(int id) : base(id)
             {
             }
 
@@ -702,6 +719,8 @@ namespace NXTCacheReader
                 using (MemoryStream stream = new MemoryStream(bytes))
                 {
                     string[] actions = { null, null, null, null, "Drop" };
+                    string[] bankActions = { null, null };
+                    string[] equipActions = { null, null, null, null, null, null, null };
                     string[] groundActions = { null, null, "Take", null, null };
                     while (stream.Position < stream.Length)
                     {
@@ -709,13 +728,13 @@ namespace NXTCacheReader
                         switch (opcode)
                         {
                             case 1:
-                                int modelId = cacheReader.ReadBigSmart(stream);
+                                ModelId = cacheReader.ReadBigSmart(stream);
                                 break;
                             case 2:
                                 Name = cacheReader.ReadString(stream);
                                 break;
                             case 4:
-                                ushort modelZoom = cacheReader.ReadUShort(stream);
+                                ModelZoom = cacheReader.ReadUShort(stream);
                                 break;
                             case 5:
                                 ushort modelRotation1 = cacheReader.ReadUShort(stream);
@@ -736,7 +755,7 @@ namespace NXTCacheReader
                                 int unknown12 = cacheReader.ReadInt(stream);
                                 break;
                             case 13:
-                                byte slot = cacheReader.ReadUByte(stream);
+                                EquipSlotId = cacheReader.ReadUByte(stream);
                                 break;
                             case 14:
                                 byte unknown14 = cacheReader.ReadUByte(stream);
@@ -945,12 +964,74 @@ namespace NXTCacheReader
                             case 165:
                                 break;
                             case 249:
-                                Dictionary<int, object> unknown249Parameters = cacheReader.Decode249(stream);
+                                foreach (KeyValuePair<int, object> param in cacheReader.Decode249(stream))
+                                {
+                                    int code = param.Key;
+                                    switch (code)
+                                    {
+                                        case 59:
+                                            IsBankable = (int)param.Value == 0;
+                                            break;
+                                        case 14:
+                                            AttackSpeed = (int)param.Value;
+                                            break;
+                                        case 118:
+                                            EquipSoundId = (int)param.Value;
+                                            break;
+                                        case 528:
+                                        case 529:
+                                        case 530:
+                                        case 531:
+                                            equipActions[code - 528] = (string)param.Value;
+                                            break;
+                                        case 537:
+                                            DropSoundId = (int)param.Value;
+                                            break;
+                                        case 1211:
+                                            equipActions[4] = (string)param.Value;
+                                            break;
+                                        case 689:
+                                            IsAlchable = (int)param.Value == 0;
+                                            break;
+                                        case 1264:
+                                        case 1265:
+                                            bankActions[code - 1264] = (string)param.Value;
+                                            break;
+                                        case 1397:
+                                            break;
+                                        case 2946:
+                                            PrayerBonus = (int)param.Value;
+                                            break;
+                                        case 3324:
+                                            break;
+                                        case 3383:
+                                            RepairCost = (int)param.Value;
+                                            break;
+                                        case 4085:
+                                            TreasureHunterText = (string)param.Value;
+                                            break;
+                                        case 4199:
+                                            TreasureHunterCashOutValue = (int)param.Value;
+                                            break;
+                                        case 5417:
+                                            DestroyText = (string)param.Value;
+                                            break;
+                                        case 6712:
+                                            equipActions[5] = (string)param.Value;
+                                            break;
+                                        case 6713:
+                                            equipActions[6] = (string)param.Value;
+                                            break;
+
+                                    }
+                                }
                                 break;
                         }
                     }
                     Actions = actions.Where(a => a != null).ToArray();
+                    bankActions = actions.Where(a => a != null).ToArray();
                     GroundActions = groundActions.Where(a => a != null).ToArray();
+                    EquipActions = equipActions.Where(a => a != null).ToArray();
                     if (CosmeticTemplateId != -1)
                     {
                         CopyFromTemplate(cacheReader.LoadDefinition<Item>(CosmeticId));
