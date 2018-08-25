@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
@@ -417,22 +417,6 @@ namespace NXTCacheReader
             }
             return toReturn == "null" ? null : toReturn;
         }
-
-        //private class CacheEntry
-        //{
-
-        //    public byte[] Bytes;
-        //    public int StartPosition;
-        //    public int EndPosition;
-
-        //    public CacheEntry(byte[] bytes, int startPosition, int endPosition)
-        //    {
-        //        Bytes = bytes;
-        //        StartPosition = startPosition;
-        //        EndPosition = endPosition;
-        //    }
-
-        //}
 
     }
 
