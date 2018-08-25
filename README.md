@@ -1,5 +1,5 @@
 # NXTCacheReader
-A C# library to help read the RuneScape NXT client cache files
+A simple C# program to help read the RuneScape NXT client cache files
 
 ## Usage
 
