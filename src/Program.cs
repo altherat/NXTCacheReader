@@ -1,27 +1,27 @@
-﻿using System;
+using NXTCacheReader;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NXTCacheReader
+namespace Test
 {
     class Program
     {
-        private const string DEFAULT_CACHE_PATH = @"C:\ProgramData\Jagex\\RuneScape";
 
         static void Main(string[] args)
         {
 
             // Instantiate the cache reader
-            CacheReader cacheReader = new CacheReader(DEFAULT_CACHE_PATH);
+            CacheReader cacheReader = new CacheReader(@"C:\ProgramData\Jagex\\RuneScape");
 
             // Load the game object with ID 69860
             Definition.Object objectDefinition = cacheReader.LoadDefinition<Definition.Object>(69860);
             // Print the object's name
             Console.WriteLine(objectDefinition.Name);
 
-            // Load Npcs with ID 1382 and 12404
+            // Load Npcs with IDs 1382 and 12404
             Dictionary<int, Definition.Npc> npcDefinitions = cacheReader.LoadDefinitions<Definition.Npc>(1382, 12404);
             // Print the Npcs' names
             foreach (Definition.Npc definition in npcDefinitions.Values)
