@@ -37,9 +37,17 @@ Currently only some of the cache is recognized and supported.
 
 ##### Items
 - Actions
+- Attack speed
 - Cosmetic ID
 - Cosmetic template ID
+- Destroy text
+- Drop sound ID
+- Equip actions
+- Equip slot ID
+- Equip sound ID
 - Ground actions
+- Is alchable
+- Is bankable
 - Is cosmetic
 - Is lent
 - Is members
@@ -48,9 +56,15 @@ Currently only some of the cache is recognized and supported.
 - Is tradeable
 - Lent ID
 - Lent template ID
+- Model ID
+- Model zoom
 - Name
 - Note ID
 - Note template ID
+- Prayer bonus
+- Repair cost
+- Treasure Hunter cash out value
+- Treasure Hunter text
 
 ##### Npcs
 - Actions
