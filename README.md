@@ -35,17 +35,6 @@ CacheReader implements its own cache system to make subsequent definition retrie
 ## Support
 Currently only some of the cache is recognized and supported.
 
-##### Objects
-- Actions
-- Name
-
-##### Npcs
-- Actions
-- Combat level
-- Is clickable
-- Is visible
-- Name
-
 ##### Items
 - Actions
 - Cosmetic ID
@@ -62,3 +51,14 @@ Currently only some of the cache is recognized and supported.
 - Name
 - Note ID
 - Note template ID
+
+##### Npcs
+- Actions
+- Combat level
+- Is clickable
+- Is visible
+- Name
+
+##### Objects
+- Actions
+- Name
