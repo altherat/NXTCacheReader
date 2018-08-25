@@ -30,7 +30,4 @@ Dictionary<int, Definition.Item> itemDefinitions = cacheReader.LoadDefinitions<D
 Dictionary<int, Definition.Item> itemDefinitions = cacheReader.LoadDefinitions<Definition.Item>();
 ```
 
-
-
-
 CacheReader implements its own cache system to make subsequent definition retrieval faster.
