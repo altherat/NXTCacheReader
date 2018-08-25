@@ -10,7 +10,8 @@ A simple C# program to help read the RuneScape NXT client cache files
 CacheReader cacheReader = new CacheReader(@"C:\ProgramData\Jagex\RuneScape");
 ```
 
-#### Read a single item definition from the cache and print the name
+#### Examples
+##### Read a single item definition from the cache and print the name
 ```
 Definition.Item bluePartyhat = cacheReader.LoadDefinition<Definition.Item>(1042);
 Console.WriteLine(bluePartyhat.Name);
@@ -20,12 +21,12 @@ Output:
 Blue partyhat
 ```
 
-#### Load several item definitions
+##### Load several item definitions
 ```
 Dictionary<int, Definition.Item> itemDefinitions = cacheReader.LoadDefinitions<Definition.Item>(1038, 1040, 1042, 1044, 1046, 1048);
 ```
 
-#### Load all item definitions
+##### Load all item definitions
 ```
 Dictionary<int, Definition.Item> itemDefinitions = cacheReader.LoadDefinitions<Definition.Item>();
 ```
