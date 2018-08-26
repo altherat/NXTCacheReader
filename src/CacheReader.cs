@@ -24,7 +24,7 @@ namespace NXTCacheReader
         private static readonly char[] SPECIAL_CHARACTERS = { '\u20AC', '\0', '\u201A', '\u0192', '\u201E', '\u2026', '\u2020', '\u2021', '\u02C6', '\u2030', '\u0160', '\u2039', '\u0152', '\0', '\u017D', '\0', '\0', '\u2018', '\u2019', '\u201C', '\u201D', '\u2022', '\u2013', '\u2014', '\u02DC', '\u2122', '\u0161', '\u203A', '\u0153', '\0', '\u017E', '\u0178' };
 
         private string CacheDirectory;
-        private Dictionary<Type, Dictionary<int, byte[]>> BlobBytes = new Dictionary<Type, Dictionary<int, byte[]>>();
+        private Dictionary<Type, Dictionary<int, Record>> Records = new Dictionary<Type, Dictionary<int, Record>>();
         private Dictionary<Type, Dictionary<int, object>> LoadedDefinitions = new Dictionary<Type, Dictionary<int, object>>();
 
         public CacheReader(string cacheDirectory)
@@ -77,78 +77,58 @@ namespace NXTCacheReader
                 loadedDefinitions = new Dictionary<int, object>();
                 LoadedDefinitions[type] = loadedDefinitions;
             }
+            Dictionary<int, Record> records;
+            if (!Records.TryGetValue(type, out records))
+            {
+                records = new Dictionary<int, Record>();
+                Records[type] = records;
+            }
             using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + CacheDirectory + "js5-" + CACHE_INDEXES[typeof(T)] + ".jcache;Version=3;"))
             {
                 connection.Open();
-                Dictionary<int, List<int>> records = new Dictionary<int, List<int>>();
                 SQLiteCommand command = connection.CreateCommand();
                 command.CommandText = "SELECT DATA FROM cache_index";
                 SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    MemoryStream stream = new MemoryStream(DecompressBlob((byte[])reader[0]));
-                    byte format = ReadByte(stream);
-                    int version = ReadInt(stream);
-                    byte flags = ReadByte(stream);
-                    int[] entryKeys = DecodeIds(stream, ReadSmart(stream, 2, 4, false));
-                    if ((flags & FLAG_IDENTIFIERS) == FLAG_IDENTIFIERS)
+                    using (MemoryStream stream = new MemoryStream(DecompressBlob((byte[])reader[0])))
                     {
-                        foreach (int key in entryKeys)
+                        stream.Position = 5;
+                        byte flags = ReadByte(stream);
+                        int[] recordKeys = DecodeIds(stream, ReadSmart(stream, 2, 4, false));
+                        int recordKeyCount = recordKeys.Length;
+                        long position = stream.Position;
+                        if ((flags & FLAG_IDENTIFIERS) == FLAG_IDENTIFIERS)
                         {
-                            int identifier = ReadInt(stream);
+                            position += recordKeyCount * 4;
+                        }
+                        if ((flags & FLAG_UNKNOWN_2) == FLAG_UNKNOWN_2)
+                        {
+                            position += recordKeyCount * 4;
+                        }
+                        if ((flags & FLAG_WHIRLPOOL) == FLAG_WHIRLPOOL)
+                        {
+                            position += recordKeyCount * WHIRLPOOL_SIZE;
+                        }
+                        if ((flags & FLAG_UNKNOWN_1) == FLAG_UNKNOWN_1)
+                        {
+                            position += recordKeyCount * 8;
+                        }
+                        stream.Position = position + recordKeyCount * 8;
+                        foreach (int key in recordKeys)
+                        {
+                            records[key] = new Record(new List<int>(ReadSmart(stream, 2, 4, false)));
+                        }
+                        foreach (Record record in records.Values)
+                        {
+                            List<int> ids = record.Ids;
+                            foreach (int id in DecodeIds(stream, ids.Capacity))
+                            {
+                                ids.Add(id);
+                            }
                         }
                     }
-                    foreach (int key in entryKeys)
-                    {
-                        int entryCrc = ReadInt(stream);
-                    }
-                    if ((flags & FLAG_UNKNOWN_2) == FLAG_UNKNOWN_2)
-                    {
-                        foreach (int key in entryKeys)
-                        {
-                            int unknown2Value = ReadInt(stream);
-                        }
-                    }
-                    if ((flags & FLAG_WHIRLPOOL) == FLAG_WHIRLPOOL)
-                    {
-                        foreach (int key in entryKeys)
-                        {
-                            byte[] whirlpoolBytes = new byte[WHIRLPOOL_SIZE];
-                            stream.Read(whirlpoolBytes, 0, WHIRLPOOL_SIZE);
-                        }
-                    }
-                    if ((flags & FLAG_UNKNOWN_1) == FLAG_UNKNOWN_1)
-                    {
-                        foreach (int key in entryKeys)
-                        {
-                            int unknown1Value1 = ReadInt(stream);
-                            int unknown1Value2 = ReadInt(stream);
-                        }
-                    }
-                    foreach (int key in entryKeys)
-                    {
-                        int entryVersion = ReadInt(stream);
-                    }
-                    foreach (int key in entryKeys)
-                    {
-                        int childCount = ReadSmart(stream, 2, 4, false);
-                        records.Add(key, new List<int>(childCount));
-                    }
-                    foreach (List<int> ids in records.Values)
-                    {
-                        foreach (int id in DecodeIds(stream, ids.Capacity))
-                        {
-                            ids.Add(id);
-                        }
-                    }
-                    if ((flags & FLAG_IDENTIFIERS) == FLAG_IDENTIFIERS)
-                    {
-                        foreach (int key in entryKeys)
-                        {
-                            int childIdentifier = ReadInt(stream);
-                        }
-                    }
-                    stream.Close();
+                    
                 }
                 reader.Close();
                 command.CommandText = "SELECT KEY, DATA FROM cache";
@@ -157,32 +137,23 @@ namespace NXTCacheReader
                 {
                     int recordKey = reader.GetInt32(0);
                     byte[] blobBytes = DecompressBlob((byte[])reader[1]);
-                    if (BlobBytes.ContainsKey(type))
-                    {
-                        BlobBytes[type][recordKey] = blobBytes;
-                    }
-                    else
-                    {
-                        BlobBytes[type] = new Dictionary<int, byte[]>()
-                        {
-                            {recordKey, blobBytes }
-                        };
-                    }
+                    Record record = records[recordKey];
+                    record.Bytes = blobBytes;
                     using (MemoryStream blobStream = new MemoryStream(blobBytes))
                     {
                         blobStream.Position = 1;
                         int nextPosition = -1;
-                        foreach (int id in records[recordKey])
+                        foreach (int id in record.Ids)
                         {
                             int actualId = (recordKey << 8) + id;
                             int startPosition = nextPosition == -1 ? ReadInt(blobStream) : nextPosition;
                             nextPosition = ReadInt(blobStream);
                             long prevPosition = blobStream.Position;
                             blobStream.Position = startPosition;
-                            byte[] data = new byte[nextPosition - startPosition];
-                            blobStream.Read(data, 0, data.Length);
+                            byte[] bytes = new byte[nextPosition - startPosition];
+                            blobStream.Read(bytes, 0, bytes.Length);
                             T definition = (T)Activator.CreateInstance(typeof(T), new object[] { actualId });
-                            definition.Deserialize(this, data);
+                            definition.Deserialize(this, bytes);
                             loadedDefinitions[actualId] = definition;
                             definitions.Add(actualId, definition);
                             blobStream.Position = prevPosition;
@@ -193,11 +164,11 @@ namespace NXTCacheReader
             return definitions;
         }
 
-        private T ReadDefinition<T>(Type type, int id, byte[] blobBytes) where T : Definition
+        private T ReadDefinition<T>(Type type, int id, Record record) where T : Definition
         {
-            using (MemoryStream stream = new MemoryStream(blobBytes))
+            using (MemoryStream stream = new MemoryStream(record.Bytes))
             {
-                stream.Position = 1 + (id & 0xFF) * 4;
+                stream.Position = 1 + (record.Ids.IndexOf(id & 0xFF)) * 4;
                 int startPosition = ReadInt(stream);
                 int endPosition = ReadInt(stream);
                 stream.Position = startPosition;
@@ -209,17 +180,60 @@ namespace NXTCacheReader
             }
         }
 
-        private byte[] ReadCacheData(int cacheIndex, int key)
+        private Record ReadRecord(int cacheIndex, int recordKey)
         {
             using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + CacheDirectory + "js5-" + cacheIndex + ".jcache;Version=3;"))
             {
                 connection.Open();
+                Dictionary<int, List<int>> recordIds = new Dictionary<int, List<int>>();
                 SQLiteCommand command = connection.CreateCommand();
-                command.CommandText = "SELECT DATA FROM cache WHERE KEY = " + key;
+                command.CommandText = "SELECT DATA FROM cache_index";
                 SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    return DecompressBlob((byte[])reader[0]);
+                    using (MemoryStream stream = new MemoryStream(DecompressBlob((byte[])reader[0])))
+                    {
+                        stream.Position = 5;
+                        byte flags = ReadByte(stream);
+                        int[] recordKeys = DecodeIds(stream, ReadSmart(stream, 2, 4, false));
+                        int recordKeyCount = recordKeys.Length;
+                        long position = stream.Position;
+                        if ((flags & FLAG_IDENTIFIERS) == FLAG_IDENTIFIERS)
+                        {
+                            position += recordKeyCount * 4;
+                        }
+                        if ((flags & FLAG_UNKNOWN_2) == FLAG_UNKNOWN_2)
+                        {
+                            position += recordKeyCount * 4;
+                        }
+                        if ((flags & FLAG_WHIRLPOOL) == FLAG_WHIRLPOOL)
+                        {
+                            position += recordKeyCount * WHIRLPOOL_SIZE;
+                        }
+                        if ((flags & FLAG_UNKNOWN_1) == FLAG_UNKNOWN_1)
+                        {
+                            position += recordKeyCount * 8;
+                        }
+                        stream.Position = position + recordKeyCount * 8;
+                        foreach (int key in recordKeys)
+                        {
+                            recordIds[key] = new List<int>(ReadSmart(stream, 2, 4, false));
+                        }
+                        foreach (List<int> ids in recordIds.Values)
+                        {
+                            foreach (int id in DecodeIds(stream, ids.Capacity))
+                            {
+                                ids.Add(id);
+                            }
+                        }
+                    }
+                }
+                reader.Close();
+                command.CommandText = "SELECT DATA FROM cache WHERE KEY = " + recordKey;
+                reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    return new Record(recordIds[recordKey], DecompressBlob((byte[])reader[0]));
                 }
             }
             return null;
@@ -229,25 +243,25 @@ namespace NXTCacheReader
         {
             Type type = typeof(T);
             int recordKey = id >> 8;
-            Dictionary<int, byte[]> cacheFileBytes;
-            if (BlobBytes.TryGetValue(type, out cacheFileBytes))
+            Dictionary<int, Record> records;
+            if (Records.TryGetValue(type, out records))
             {
-                byte[] blobBytes;
-                if (!cacheFileBytes.TryGetValue(recordKey, out blobBytes))
+                Record record;
+                if (!records.TryGetValue(recordKey, out record))
                 {
-                    blobBytes = ReadCacheData(CACHE_INDEXES[type], recordKey);
-                    BlobBytes[type][recordKey] = blobBytes;
+                    record = ReadRecord(CACHE_INDEXES[type], recordKey);
+                    records[recordKey] = record;
                 }
-                return ReadDefinition<T>(type, id, blobBytes);
+                return ReadDefinition<T>(type, id, record);
             }
             else
             {
-                byte[] blobBytes = ReadCacheData(CACHE_INDEXES[type], recordKey);
-                BlobBytes[type] = new Dictionary<int, byte[]>()
+                Record record = ReadRecord(CACHE_INDEXES[type], recordKey);
+                Records[type] = new Dictionary<int, Record>()
                 {
-                    { recordKey, blobBytes }
+                    { recordKey, record }
                 };
-                return ReadDefinition<T>(type, id, blobBytes);
+                return ReadDefinition<T>(type, id, record);
             }
         }
 
@@ -413,6 +427,24 @@ namespace NXTCacheReader
                 toReturn += c;
             }
             return toReturn == "null" ? null : toReturn;
+        }
+
+        private class Record
+        {
+            public List<int> Ids;
+            public byte[] Bytes;
+
+            public Record(List<int> ids)
+            {
+                Ids = ids;
+            }
+
+            public Record(List<int> ids, byte[] bytes)
+            {
+                Ids = ids;
+                Bytes = bytes;
+            }
+
         }
 
     }
