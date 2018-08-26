@@ -681,14 +681,22 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
+            public int Armour = -1;
             public int AttackSpeed = -1;
             public int CosmeticId = -1;
             public int CosmeticTemplateId = -1;
             public string DestroyText;
+            public int DiangoReplacementCost = -1;
             public int DropSoundId = -1;
             public string[] EquipActions;
+            public int EquipRatioMagic = -1;
+            public int EquipRatioMelee = -1;
+            public int EquipRatioRanged = -1;
+            public int EquipRequirementSkillId = -1;
+            public int EquipRequirementSkillLevel = -1;
             public int EquipSlotId = -1;
             public int EquipSoundId = -1;
+            public int GrandExchangeCategoryId = -1;
             public string[] GroundActions;
             public bool IsAlchable = true;
             public bool IsBankable = true;
@@ -700,12 +708,18 @@ namespace NXTCacheReader
             public bool IsTradeable;
             public int LentId = -1;
             public int LentTemplateId = -1;
+            public int MagicAccuracy = -1;
+            public int MagicDamage = -1;
+            public int MeleeAccuracy = -1;
+            public int MeleeDamage = -1;
             public int ModelId = -1;
             public int ModelZoom = -1;
             public string Name;
             public int NoteId = -1;
             public int NoteTemplateId = -1;
             public int PrayerBonus = -1;
+            public int RangedAccuracy = -1;
+            public int RangedDamage = -1;
             public int RepairCost = -1;
             public int TreasureHunterCashOutValue;
             public string TreasureHunterText;
@@ -969,11 +983,17 @@ namespace NXTCacheReader
                                     int code = param.Key;
                                     switch (code)
                                     {
-                                        case 59:
-                                            IsBankable = (int)param.Value == 0;
+                                        case 3:
+                                            MagicAccuracy = (int)param.Value;
+                                            break;
+                                        case 4:
+                                            RangedAccuracy = (int)param.Value;
                                             break;
                                         case 14:
                                             AttackSpeed = (int)param.Value;
+                                            break;
+                                        case 59:
+                                            IsBankable = (int)param.Value == 0;
                                             break;
                                         case 118:
                                             EquipSoundId = (int)param.Value;
@@ -987,11 +1007,26 @@ namespace NXTCacheReader
                                         case 537:
                                             DropSoundId = (int)param.Value;
                                             break;
-                                        case 1211:
-                                            equipActions[4] = (string)param.Value;
+                                        case 641:
+                                            MeleeDamage = (int)param.Value;
+                                            break;
+                                        case 643:
+                                            RangedDamage = (int)param.Value;
                                             break;
                                         case 689:
                                             IsAlchable = (int)param.Value == 0;
+                                            break;
+                                        case 749:
+                                            EquipRequirementSkillId = (int)param.Value;
+                                            break;
+                                        case 750:
+                                            EquipRequirementSkillLevel = (int)param.Value;
+                                            break;
+                                        case 965:
+                                            MagicDamage = (int)param.Value;
+                                            break;
+                                        case 1211:
+                                            equipActions[4] = (string)param.Value;
                                             break;
                                         case 1264:
                                         case 1265:
@@ -999,8 +1034,29 @@ namespace NXTCacheReader
                                             break;
                                         case 1397:
                                             break;
+                                        case 2195:
+                                            GrandExchangeCategoryId = (int)param.Value;
+                                            break;
+                                        case 2866:
+                                            EquipRatioRanged = (int)param.Value;
+                                            break;
+                                        case 2867:
+                                            EquipRatioMelee = (int)param.Value;
+                                            break;
+                                        case 2868:
+                                            EquipRatioMagic = (int)param.Value;
+                                            break;
+                                        case 2870:
+                                            Armour = (int)param.Value;
+                                            break;
                                         case 2946:
                                             PrayerBonus = (int)param.Value;
+                                            break;
+                                        case 3267:
+                                            MeleeAccuracy = (int)param.Value;
+                                            break;
+                                        case 3322:
+                                            DiangoReplacementCost = (int)param.Value;
                                             break;
                                         case 3324:
                                             break;
@@ -1012,6 +1068,8 @@ namespace NXTCacheReader
                                             break;
                                         case 4199:
                                             TreasureHunterCashOutValue = (int)param.Value;
+                                            break;
+                                        case 4749:
                                             break;
                                         case 5417:
                                             DestroyText = (string)param.Value;
@@ -1047,6 +1105,8 @@ namespace NXTCacheReader
                 }
             }
 
+            public static bool print = true;
+
             internal void CopyFromTemplate(Item template)
             {
                 Actions = template.Actions;
@@ -1054,6 +1114,8 @@ namespace NXTCacheReader
                 IsMembers = template.IsMembers;
                 IsTradeable = template.IsTradeable;
                 Name = template.Name;
+            }
+
         }
 
     }
