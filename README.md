@@ -42,7 +42,7 @@ Currently only some of the cache is recognized and supported.
 - Attack speed
 - Bank actions
 - Consumption life points quantity
-- Cosmetic ID
+- Cosmetic item ID
 - Cosmetic template ID
 - Creation experience quantities
 - Creation required item IDs
@@ -66,11 +66,18 @@ Currently only some of the cache is recognized and supported.
 - Is alchable
 - Is bankable
 - Is cosmetic
+- Is degradable
 - Is lent
+- Is magic armour
+- Is magic weapon
+- Is melee armour
+- Is melee weapon
 - Is members
 - Is noted
+- Is ranged armour
+- Is raned weapon
 - Is stackable
-- Is tradeable
+- Is tradable
 - Lent item ID
 - Lent template ID
 - Magic accuracy
@@ -87,15 +94,26 @@ Currently only some of the cache is recognized and supported.
 - Ranged accuracy
 - Ranged damage
 - Repair cost
+- Tier
 - Treasure Hunter cash out value
 - Treasure Hunter text
 
 ##### Npcs
 - Actions
+- Armour
+- Attack speed
 - Combat level
+- Combat style ID
 - Is clickable
 - Is visible
+- Magic accuracy
+- Magic damage
+- Melee accuracy
+- Melee damage
 - Name
+- Ranged accuracy
+- Ranged damage
+- Weakness ID
 
 ##### Objects
 - Actions
