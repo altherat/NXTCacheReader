@@ -40,15 +40,23 @@ Currently only some of the cache is recognized and supported.
 - Actions
 - Armour
 - Attack speed
+- Bank actions
+- Consumption life points quantity
 - Cosmetic ID
 - Cosmetic template ID
+- Creation experience quantities
+- Creation required item IDs
+- Creation required item quantities
+- Creation required skill IDs
+- Creation required tool item IDs
 - Destroy text
+- Degredation item ID
 - Diango replacement cost
 - Drop sound ID
 - Equip actions
-- Equip ratio (magic)
-- Equip ratio (melee)
-- Equip ratio (ranged)
+- Equip magic ratio
+- Equip melee ratio
+- Equip ranged ratio
 - Equip requirement skill ID
 - Equip requirement skill level
 - Equip slot ID
@@ -63,16 +71,17 @@ Currently only some of the cache is recognized and supported.
 - Is noted
 - Is stackable
 - Is tradeable
-- Lent ID
+- Lent item ID
 - Lent template ID
 - Magic accuracy
 - Magic damage
+- Max charges
 - Melee accuracy
 - Melee damage
 - Model ID
 - Model zoom
 - Name
-- Note ID
+- Note item ID
 - Note template ID
 - Prayer bonus
 - Ranged accuracy
