@@ -38,14 +38,22 @@ Currently only some of the cache is recognized and supported.
 
 ##### Items
 - Actions
+- Armour
 - Attack speed
 - Cosmetic ID
 - Cosmetic template ID
 - Destroy text
+- Diango replacement cost
 - Drop sound ID
 - Equip actions
+- Equip ratio (magic)
+- Equip ratio (melee)
+- Equip ratio (ranged)
+- Equip requirement skill ID
+- Equip requirement skill level
 - Equip slot ID
 - Equip sound ID
+- Grand Exchange category ID
 - Ground actions
 - Is alchable
 - Is bankable
@@ -57,12 +65,18 @@ Currently only some of the cache is recognized and supported.
 - Is tradeable
 - Lent ID
 - Lent template ID
+- Magic accuracy
+- Magic damage
+- Melee accuracy
+- Melee damage
 - Model ID
 - Model zoom
 - Name
 - Note ID
 - Note template ID
 - Prayer bonus
+- Ranged accuracy
+- Ranged damage
 - Repair cost
 - Treasure Hunter cash out value
 - Treasure Hunter text
