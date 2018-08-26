@@ -38,7 +38,7 @@ Currently only some of the cache is recognized and supported.
 
 ##### Items
 - Actions
-- Armour
+- Armour bonus
 - Attack speed
 - Bank actions
 - Consumption life points quantity
@@ -67,6 +67,7 @@ Currently only some of the cache is recognized and supported.
 - Is bankable
 - Is cosmetic
 - Is degradable
+- Is dungeoneering item
 - Is lent
 - Is magic armour
 - Is magic weapon
@@ -80,6 +81,7 @@ Currently only some of the cache is recognized and supported.
 - Is tradable
 - Lent item ID
 - Lent template ID
+- Life point bonus
 - Magic accuracy
 - Magic damage
 - Max charges
