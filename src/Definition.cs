@@ -1105,8 +1105,6 @@ namespace NXTCacheReader
                 }
             }
 
-            public static bool print = true;
-
             internal void CopyFromTemplate(Item template)
             {
                 Actions = template.Actions;
