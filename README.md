@@ -99,6 +99,8 @@ Currently only some of the cache is recognized and supported.
 - Tier
 - Treasure Hunter cash out value
 - Treasure Hunter text
+- Use required skill ID
+- Use required skill level
 
 ##### Npcs
 - Actions
@@ -119,4 +121,28 @@ Currently only some of the cache is recognized and supported.
 
 ##### Objects
 - Actions
+- Height
+- Is walkable
 - Name
+- Width
+
+##### Widgets
+- Actions
+- Animation ID
+- Base height
+- Base position X
+- Base position Y
+- Base width
+- Content type
+- Is hidden
+- Is hover disabled
+- Parent ID
+- Scroll width
+- Scroll height
+- Sprite pitch
+- Sprite roll
+- Sprite scale
+- Sprite yaw
+- Text
+- Textcolor
+- Type
