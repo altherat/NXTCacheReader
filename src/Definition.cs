@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,330 @@ namespace NXTCacheReader
         }
 
         internal abstract void Deserialize(CacheReader cacheReader, byte[] bytes);
+
+        public class Widget : Definition
+        {
+
+            public string[] Actions;
+            public int AnimationId;
+            public ushort BaseHeight;
+            public short BasePositionX;
+            public short BasePositionY;
+            public ushort BaseWidth;
+            public ushort ContentType;
+            public bool IsHidden;
+            public bool IsHoverDisabled;
+            public int ParentId;
+            public ushort ScrollWidth;
+            public ushort ScrollHeight;
+            public ushort SpritePitch;
+            public ushort SpriteRoll;
+            public ushort SpriteScale;
+            public ushort SpriteYaw;
+            public string Text;
+            public int TextColor;
+            public int Type;
+
+            public Widget(int id) : base(id)
+            {
+            }
+
+            internal override void Deserialize(CacheReader cacheReader, byte[] bytes)
+            {
+                using (MemoryStream stream = new MemoryStream(bytes))
+                {
+                    while (stream.Position < stream.Length)
+                    {
+                        int unknown1 = cacheReader.ReadUByte(stream);
+                        if (unknown1 == 255)
+                        {
+                            unknown1 = -1;
+                        }
+                        Type = cacheReader.ReadUByte(stream);
+                        if ((Type & 0x80) != 0)
+                        {
+                            Type = (Type & 0x7f);
+                            string unknown2 = cacheReader.ReadString(stream);
+                        }
+                        ContentType = cacheReader.ReadUShort(stream);
+                        BasePositionX = cacheReader.ReadShort(stream);
+                        BasePositionY = cacheReader.ReadShort(stream);
+                        BaseWidth = cacheReader.ReadUShort(stream);
+                        BaseHeight = cacheReader.ReadUShort(stream);
+                        byte unknown3 = cacheReader.ReadByte(stream);
+                        byte unknown4 = cacheReader.ReadByte(stream);
+                        byte unknown5 = cacheReader.ReadByte(stream);
+                        byte unknown6 = cacheReader.ReadByte(stream);
+                        ParentId = cacheReader.ReadUShort(stream);
+                        if (ParentId == 65535)
+                        {
+                            ParentId = 107738123;
+                        }
+                        else
+                        {
+                            ParentId = (Id & ~0xffff) + ParentId;
+                        }
+                        int unknown7 = cacheReader.ReadUByte(stream);
+                        IsHidden = (unknown7 & 0x1) != 0;
+                        if (unknown1 >= 0)
+                        {
+                            IsHoverDisabled = (unknown7 & 0x2) != 0;
+                        }
+                        switch (Type)
+                        {
+                            case 0:
+                                ScrollWidth = cacheReader.ReadUShort(stream);
+                                ScrollHeight = cacheReader.ReadUShort(stream);
+                                if (unknown1 < 0)
+                                {
+                                    IsHoverDisabled = cacheReader.ReadUByte(stream) == 1;
+                                }
+                                break;
+                            case 3:
+                                TextColor = cacheReader.ReadInt(stream);
+                                bool unknown8 = cacheReader.ReadUByte(stream) == 1;
+                                byte unknown9 = cacheReader.ReadUByte(stream);
+                                break;
+                            case 4:
+                                int unknown10 = cacheReader.ReadBigSmart(stream);
+                                if (unknown1 >= 2)
+                                {
+                                    bool unknown11 = cacheReader.ReadUByte(stream) == 1;
+                                }
+                                Text = cacheReader.ReadString(stream);
+                                byte unknown12 = cacheReader.ReadUByte(stream);
+                                byte unknown13 = cacheReader.ReadUByte(stream);
+                                byte unknown14 = cacheReader.ReadUByte(stream);
+                                bool unknown15 = cacheReader.ReadUByte(stream) == 1;
+                                TextColor = cacheReader.ReadInt(stream);
+                                byte unknown16 = cacheReader.ReadUByte(stream);
+                                if (unknown1 >= 0)
+                                {
+                                    byte unknown17 = cacheReader.ReadUByte(stream);
+                                }
+                                break;
+                            case 5:
+                                int unknown18 = cacheReader.ReadInt(stream);
+                                ushort unknown19 = cacheReader.ReadUShort(stream);
+                                int unknown20 = cacheReader.ReadUByte(stream);
+                                //bool unknownUnused1 = (unknown20 & 0x1) != 0;
+                                //bool unknownUnused2 = (unknown20 & 0x2) != 0;
+                                byte unknown21 = cacheReader.ReadUByte(stream);
+                                byte unknown22 = cacheReader.ReadUByte(stream);
+                                int unknown23 = cacheReader.ReadInt(stream);
+                                bool unknown24 = cacheReader.ReadUByte(stream) == 1;
+                                bool unknown25 = cacheReader.ReadUByte(stream) == 1;
+                                TextColor = cacheReader.ReadInt(stream);
+                                if (unknown1 >= 3)
+                                {
+                                    bool unknown26 = cacheReader.ReadUByte(stream) == 1;
+                                }
+                                break;
+                            case 6:
+                                int unknown27 = cacheReader.ReadBigSmart(stream);
+                                byte unknown28 = cacheReader.ReadUByte(stream);
+                                if ((unknown28 & 0x1) == 1)
+                                {
+                                    short unknown29 = cacheReader.ReadShort(stream);
+                                    short unknown30 = cacheReader.ReadShort(stream);
+                                    SpritePitch = cacheReader.ReadUShort(stream);
+                                    SpriteRoll = cacheReader.ReadUShort(stream);
+                                    SpriteYaw = cacheReader.ReadUShort(stream);
+                                    SpriteScale = cacheReader.ReadUShort(stream);
+                                }
+                                else if ((unknown28 & 0x2) == 2)
+                                {
+                                    short unknown31 = cacheReader.ReadShort(stream);
+                                    short unknown32 = cacheReader.ReadShort(stream);
+                                    short unknown33 = cacheReader.ReadShort(stream);
+                                    SpritePitch = cacheReader.ReadUShort(stream);
+                                    SpriteRoll = cacheReader.ReadUShort(stream);
+                                    SpriteYaw = cacheReader.ReadUShort(stream);
+                                    SpriteScale = cacheReader.ReadUShort(stream);
+                                }
+                                AnimationId = cacheReader.ReadBigSmart(stream);
+                                if (unknown3 != 0)
+                                {
+                                    ushort unknown34 = cacheReader.ReadUShort(stream);
+                                }
+                                if (unknown4 != 0)
+                                {
+                                    ushort unknown35 = cacheReader.ReadUShort(stream);
+                                }
+                                break;
+                            case 9:
+                                byte unknown36 = cacheReader.ReadUByte(stream);
+                                TextColor = cacheReader.ReadInt(stream);
+                                bool unknown37 = cacheReader.ReadUByte(stream) == 1;
+                                break;
+                        }
+                        uint unknown38 = cacheReader.ReadUInt24(stream);
+                        int unknown39 = cacheReader.ReadUByte(stream);
+                        if (unknown39 != 0)
+                        {
+                            byte[][] unknown40 = new byte[11][];
+                            byte[][] unknown41 = new byte[11][];
+                            int[] unknown42 = new int[11];
+                            for (; unknown39 != 0; unknown39 = cacheReader.ReadUByte(stream))
+                            {
+                                int unknown44 = (unknown39 >> 4) - 1;
+                                unknown39 = (unknown39 << 8 | cacheReader.ReadUByte(stream)) & 0xfff;
+                                if (unknown39 == 4095)
+                                {
+                                    unknown39 = -1;
+                                }
+                                unknown42[unknown44] = unknown39;
+                                unknown40[unknown44] = new byte[] { cacheReader.ReadByte(stream) };
+                                unknown41[unknown44] = new byte[] { cacheReader.ReadByte(stream) };
+                            }
+                        }
+                        string unknown45 = cacheReader.ReadString(stream);
+                        byte unknown46 = cacheReader.ReadUByte(stream);
+                        int unknown47 = unknown46 & 0xf;
+                        int unknown48 = unknown46 >> 4;
+                        if (unknown47 > 0)
+                        {
+                            Actions = new string[unknown47];
+                            for (int i = 0; i < unknown47; i++)
+                            {
+                                Actions[i] = cacheReader.ReadString(stream);
+                            }
+                        }
+                        if (unknown48 > 0)
+                        {
+                            int unknown49 = cacheReader.ReadUByte(stream);
+                            int[] unknown50 = new int[1 + unknown49];
+                            for (int i = 0; i < unknown50.Length; i++)
+                            {
+                                unknown50[i] = -1;
+                            }
+                            unknown50[unknown49] = cacheReader.ReadUShort(stream);
+                            if (unknown48 > 1)
+                            {
+                                unknown50[cacheReader.ReadUByte(stream)] = cacheReader.ReadUShort(stream);
+                            }
+                        }
+                        string unknown51 = cacheReader.ReadString(stream);
+                        if (unknown51 == "")
+                        {
+                            unknown51 = null;
+                        }
+                        byte unknown52 = cacheReader.ReadUByte(stream);
+                        byte unknown53 = cacheReader.ReadUByte(stream);
+                        byte unknown54 = cacheReader.ReadUByte(stream);
+                        string unknown55 = cacheReader.ReadString(stream);
+                        if ((unknown38 >> 11 & 0x7f) != 0)
+                        {
+                            ushort unknown56 = cacheReader.ReadUShort(stream);
+                            //if (unknown56 == 65535)
+                            //{
+                            //    unknown56 = -1;
+                            //}
+                            int unknown57 = cacheReader.ReadUShort(stream);
+                            //if (unknown57 == 65535)
+                            //{
+                            //    unknown57 = 1887779447;
+                            //}
+                            int unknown58 = cacheReader.ReadUShort(stream);
+                            //if (unknown58 == 65535)
+                            //{
+                            //    unknown58 = 1132968959;
+                            //}
+                        }
+                        if (unknown1 >= 0)
+                        {
+                            //Dictionary<uint, object> unknown59 = new Dictionary<uint, object>();
+                            int unknown59 = cacheReader.ReadUShort(stream);
+                            //if (unknown59 == 65535)
+                            //{
+                            //    unknown59 = 592771235;
+                            //}
+                            for (int i = 0; i < cacheReader.ReadUByte(stream); i++)
+                            {
+                                cacheReader.ReadUInt24(stream);
+                                cacheReader.ReadInt(stream);
+                                //unknown59.Add(cacheReader.ReadUInt24(stream), cacheReader.ReadInt(stream));
+                            }
+                            for (int i = 0; i < cacheReader.ReadUByte(stream); i++)
+                            {
+                                cacheReader.ReadUInt24(stream);
+                                cacheReader.ReadString(stream);
+                                //unknown59.Add(cacheReader.ReadUInt24(stream), cacheReader.ReadString(stream));
+                            }
+                        }
+                        object[] unknown60 = Unknown1(cacheReader, stream);
+                        object[] unknown61 = Unknown1(cacheReader, stream);
+                        object[] unknown62 = Unknown1(cacheReader, stream);
+                        object[] unknown63 = Unknown1(cacheReader, stream);
+                        object[] unknown64 = Unknown1(cacheReader, stream);
+                        object[] unknown65 = Unknown1(cacheReader, stream);
+                        object[] unknown66 = Unknown1(cacheReader, stream);
+                        object[] unknown67 = Unknown1(cacheReader, stream);
+                        object[] unknown68 = Unknown1(cacheReader, stream);
+                        object[] unknown69 = Unknown1(cacheReader, stream);
+                        if (unknown1 >= 0)
+                        {
+                            object[] unknown70 = Unknown1(cacheReader, stream);
+                        }
+                        object[] unknown71 = Unknown1(cacheReader, stream);
+                        object[] unknown72 = Unknown1(cacheReader, stream);
+                        object[] unknown73 = Unknown1(cacheReader, stream);
+                        object[] unknown74 = Unknown1(cacheReader, stream);
+                        object[] unknown75 = Unknown1(cacheReader, stream);
+                        object[] unknown76 = Unknown1(cacheReader, stream);
+                        object[] unknown77 = Unknown1(cacheReader, stream);
+                        object[] unknown78 = Unknown1(cacheReader, stream);
+                        object[] unknown79 = Unknown1(cacheReader, stream);
+                        object[] unknown80 = Unknown1(cacheReader, stream);
+                        int[] unknown81 = Unknown2(cacheReader, stream);
+                        int[] unknown82 = Unknown2(cacheReader, stream);
+                        int[] unknown83 = Unknown2(cacheReader, stream);
+                        int[] unknown84 = Unknown2(cacheReader, stream);
+                        int[] unknown85 = Unknown2(cacheReader, stream);
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        private object[] Unknown1(CacheReader cacheReader, MemoryStream stream)
+        {
+            int unknown1 = cacheReader.ReadUByte(stream);
+            if (unknown1 == 0)
+            {
+                return null;
+            }
+            object[] unknown2 = new object[unknown1];
+            for (int i = 0; i < unknown1; i++)
+            {
+                int unknown3 = cacheReader.ReadUByte(stream);
+                if (unknown3 == 0)
+                {
+                    unknown2[i] = cacheReader.ReadInt(stream);
+                }
+                else if (unknown3 == 1)
+                {
+                    unknown2[i] = cacheReader.ReadString(stream);
+                }
+            }
+            return unknown2;
+        }
+
+        private int[] Unknown2(CacheReader cacheReader, MemoryStream stream)
+        {
+            byte unknown1 = cacheReader.ReadUByte(stream);
+            if (unknown1 == 0)
+            {
+                return null;
+            }
+            int[] unknown2 = new int[unknown1];
+            for (int i = 0; i < unknown1; i++)
+            {
+                unknown2[i] = cacheReader.ReadInt(stream);
+            }
+            return unknown2;
+        }
 
         public class Object : Definition
         {
@@ -174,7 +499,7 @@ namespace NXTCacheReader
                                 }
                                 break;
                             case 78:
-                                ushort unkonwn781 = cacheReader.ReadUShort(stream);
+                                ushort unknown781 = cacheReader.ReadUShort(stream);
                                 byte unknown782 = cacheReader.ReadUByte(stream);
                                 break;
                             case 79:
@@ -374,10 +699,20 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
-            public int CombatLevel;
+            public int Armour = -1;
+            public int AttackSpeed = -1;
+            public int CombatLevel = -1;
+            public int CombatStyleId = -1;
             public bool IsClickable;
             public bool IsVisible;
+            public int MagicAccuracy = -1;
+            public int MagicDamage = -1;
+            public int MeleeAccuracy = -1;
+            public int MeleeDamage = -1;
             public string Name;
+            public int RangedAccuracy = -1;
+            public int RangedDamage = -1;
+            public int WeaknessId = -1;
 
             public Npc(int id) : base(id)
             {
@@ -668,7 +1003,49 @@ namespace NXTCacheReader
                             case 182:
                                 break;
                             case 249:
-                                Dictionary<int, object> unknown249Parameters = cacheReader.Decode249(stream);
+                                foreach (KeyValuePair<int, object> param in cacheReader.Decode249(stream))
+                                {
+                                    int code = param.Key;
+                                    switch (code)
+                                    {
+                                        case 3:
+                                            MagicAccuracy = (int)param.Value;
+                                            break;
+                                        case 4:
+                                            RangedAccuracy = (int)param.Value;
+                                            break;
+                                        case 14:
+                                            AttackSpeed = (int)param.Value;
+                                            break;
+                                        case 26:
+                                            CombatStyleId = (int)param.Value;
+                                            break;
+                                        case 29:
+                                            MeleeAccuracy = (int)param.Value;
+                                            break;
+                                        case 641:
+                                            MeleeDamage = (int)param.Value;
+                                            break;
+                                        case 643:
+                                            RangedDamage = (int)param.Value;
+                                            break;
+                                        case 965:
+                                            MagicDamage = (int)param.Value;
+                                            break;
+                                        case 2848:
+                                            WeaknessId = (int)param.Value;
+                                            break;
+                                        case 2849:
+                                        case 2850:
+                                        case 2851:
+                                        case 2852:
+                                            // Weakness modifiers
+                                            break;
+                                        case 2865:
+                                            Armour = (int)param.Value;
+                                            break;
+                                    }
+                                }
                                 break;
                         }
                     }
@@ -681,48 +1058,70 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
-            public int Armour = -1;
+            public int ArmourBonus = -1;
             public int AttackSpeed = -1;
-            public int CosmeticId = -1;
+            public string[] BankActions;
+            public int ConsumptionLifePointsQuantity = -1;
+            public int CosmeticItemId = -1;
             public int CosmeticTemplateId = -1;
+            public int[] CreationExperienceQuantities;
+            public int[] CreationRequiredItemIds;
+            public int[] CreationRequiredItemQuantities;
+            public int[] CreationRequiredSkillIds;
+            public int[] CreationRequiredToolItemIds;
             public string DestroyText;
+            public int DegredationItemId = -1;
             public int DiangoReplacementCost = -1;
             public int DropSoundId = -1;
             public string[] EquipActions;
-            public int EquipRatioMagic = -1;
-            public int EquipRatioMelee = -1;
-            public int EquipRatioRanged = -1;
-            public int EquipRequirementSkillId = -1;
-            public int EquipRequirementSkillLevel = -1;
+            public int EquipMagicRatio = -1;
+            public int EquipMeleeRatio = -1;
+            public int EquipRangedratio = -1;
+            public int[] EquipRequiredSkillIds;
+            public int[] EquipRequiredSkillLevels;
             public int EquipSlotId = -1;
             public int EquipSoundId = -1;
             public int GrandExchangeCategoryId = -1;
             public string[] GroundActions;
             public bool IsAlchable = true;
             public bool IsBankable = true;
-            public bool IsCosmetic => CosmeticTemplateId != -1;
-            public bool IsLent => LentTemplateId != -1;
+            public bool IsCosmetic;
+            public bool IsDegradable;
+            public bool IsDungeoneeringItem;
+            public bool IsLent;
+            public bool IsMagicArmour;
+            public bool IsMagicWeapon;
+            public bool IsMeleeArmour;
+            public bool IsMeleeWeapon;
             public bool IsMembers;
-            public bool IsNoted => NoteTemplateId != -1;
+            public bool IsNoted;
+            public bool IsRangedArmour;
+            public bool IsRangedWeapon;
+            public bool IsShield;
             public bool IsStackable;
-            public bool IsTradeable;
-            public int LentId = -1;
+            public bool IsTradable;
+            public int LentItemId = -1;
             public int LentTemplateId = -1;
+            public int LifePointBonus = -1;
             public int MagicAccuracy = -1;
             public int MagicDamage = -1;
+            public int MaxCharges = -1;
             public int MeleeAccuracy = -1;
             public int MeleeDamage = -1;
             public int ModelId = -1;
             public int ModelZoom = -1;
             public string Name;
-            public int NoteId = -1;
+            public int NoteItemId = -1;
             public int NoteTemplateId = -1;
             public int PrayerBonus = -1;
             public int RangedAccuracy = -1;
             public int RangedDamage = -1;
             public int RepairCost = -1;
-            public int TreasureHunterCashOutValue;
+            public int Tier = -1;
+            public int TreasureHunterCashOutValue = -1;
             public string TreasureHunterText;
+            public int UseRequiredSkillId;
+            public int UseRequiredSkillLevel;
 
             public Item(int id) : base(id)
             {
@@ -733,8 +1132,6 @@ namespace NXTCacheReader
                 using (MemoryStream stream = new MemoryStream(bytes))
                 {
                     string[] actions = { null, null, null, null, "Drop" };
-                    string[] bankActions = { null, null };
-                    string[] equipActions = { null, null, null, null, null, null, null };
                     string[] groundActions = { null, null, "Take", null, null };
                     while (stream.Position < stream.Length)
                     {
@@ -847,7 +1244,7 @@ namespace NXTCacheReader
                                 ushort unkown45 = cacheReader.ReadUShort(stream);
                                 break;
                             case 65:
-                                IsTradeable = true;
+                                IsTradable = true;
                                 break;
                             case 78:
                                 int unknown78 = cacheReader.ReadBigSmart(stream);
@@ -880,10 +1277,11 @@ namespace NXTCacheReader
                                 byte unknown96 = cacheReader.ReadByte(stream);
                                 break;
                             case 97:
-                                NoteId = cacheReader.ReadUShort(stream);
+                                NoteItemId = cacheReader.ReadUShort(stream);
                                 break;
                             case 98:
                                 NoteTemplateId = cacheReader.ReadUShort(stream);
+                                IsNoted = true;
                                 break;
                             case 100:
                             case 101:
@@ -913,10 +1311,11 @@ namespace NXTCacheReader
                                 byte team = cacheReader.ReadUByte(stream);
                                 break;
                             case 121:
-                                LentId = cacheReader.ReadUShort(stream);
+                                LentItemId = cacheReader.ReadUShort(stream);
                                 break;
                             case 122:
                                 LentTemplateId = cacheReader.ReadUShort(stream);
+                                IsLent = true;
                                 break;
                             case 125:
                                 byte unknown1251 = cacheReader.ReadByte(stream);
@@ -940,10 +1339,11 @@ namespace NXTCacheReader
                                 byte unknown134 = cacheReader.ReadUByte(stream);
                                 break;
                             case 139:
-                                CosmeticId = cacheReader.ReadUShort(stream);
+                                CosmeticItemId = cacheReader.ReadUShort(stream);
                                 break;
                             case 140:
                                 CosmeticTemplateId = cacheReader.ReadUShort(stream);
+                                IsCosmetic = true;
                                 break;
                             case 142:
                             case 143:
@@ -978,6 +1378,15 @@ namespace NXTCacheReader
                             case 165:
                                 break;
                             case 249:
+                                string[] bankActions = { null, null };
+                                int[] creationExperienceGains = { -1, -1 };
+                                int[] creationRequiredItemIds = { -1, -1, -1, -1, -1, -1, -1 };
+                                int[] creationRequiredItemQuantities = { -1, -1, -1, -1, -1, -1, -1 };
+                                int[] creationRequiredSkillIds = { -1, -1 };
+                                int[] creationRequiredToolItemIds = { -1, -1 };
+                                string[] equipActions = { null, null, null, null, null, null, null };
+                                int[] equipRequiredSkillIds = { -1, -1 };
+                                int[] equipRequiredSkillLevels = { -1, -1 };
                                 foreach (KeyValuePair<int, object> param in cacheReader.Decode249(stream))
                                 {
                                     int code = param.Key;
@@ -991,6 +1400,11 @@ namespace NXTCacheReader
                                             break;
                                         case 14:
                                             AttackSpeed = (int)param.Value;
+                                            break;
+                                        case 23:
+                                            Tier = (int)param.Value;
+                                            break;
+                                        case 31: //Death flag
                                             break;
                                         case 59:
                                             IsBankable = (int)param.Value == 0;
@@ -1013,17 +1427,37 @@ namespace NXTCacheReader
                                         case 643:
                                             RangedDamage = (int)param.Value;
                                             break;
+                                        case 686: //Weapon animation struct ID
+                                            break;
                                         case 689:
                                             IsAlchable = (int)param.Value == 0;
                                             break;
                                         case 749:
-                                            EquipRequirementSkillId = (int)param.Value;
+                                            equipRequiredSkillIds[0] = (int)param.Value;
                                             break;
                                         case 750:
-                                            EquipRequirementSkillLevel = (int)param.Value;
+                                            equipRequiredSkillLevels[0] = (int)param.Value;
+                                            break;
+                                        case 751:
+                                            equipRequiredSkillIds[1] = (int)param.Value;
+                                            break;
+                                        case 752:
+                                            equipRequiredSkillLevels[1] = (int)param.Value;
+                                            break;
+                                        case 770:
+                                            UseRequiredSkillId = (int)param.Value;
+                                            break;
+                                        case 771:
+                                            UseRequiredSkillLevel = (int)param.Value;
+                                            break;
+                                        case 963:
+                                            ConsumptionLifePointsQuantity = (int)param.Value;
                                             break;
                                         case 965:
                                             MagicDamage = (int)param.Value;
+                                            break;
+                                        case 1047:
+                                            IsDungeoneeringItem = (int)param.Value == 1;
                                             break;
                                         case 1211:
                                             equipActions[4] = (string)param.Value;
@@ -1032,25 +1466,89 @@ namespace NXTCacheReader
                                         case 1265:
                                             bankActions[code - 1264] = (string)param.Value;
                                             break;
-                                        case 1397:
+                                        case 1324:
+                                            IsDegradable = (int)param.Value == 1;
+                                            break;
+                                        case 1326:
+                                            LifePointBonus = (int)param.Value;
+                                            break;
+                                        case 1397: //Death flag
                                             break;
                                         case 2195:
                                             GrandExchangeCategoryId = (int)param.Value;
                                             break;
+                                        case 2281: //Decant struct ID
+                                            break;
+                                        case 2650:
+                                        case 2651:
+                                            creationRequiredToolItemIds[code - 2650] = (int)param.Value;
+                                            break;
+                                        case 2655:
+                                        case 2656:
+                                        case 2657:
+                                        case 2658:
+                                        case 2659:
+                                        case 2660:
+                                        case 2661:
+                                            creationRequiredItemIds[code - 2655] = (int)param.Value;
+                                            break;
+                                        case 2665:
+                                        case 2666:
+                                        case 2667:
+                                        case 2668:
+                                        case 2669:
+                                        case 2670:
+                                        case 2671:
+                                            creationRequiredItemQuantities[code - 2665] = (int)param.Value;
+                                            break;
+                                        case 2696:
+                                            creationRequiredSkillIds[0] = (int)param.Value;
+                                            creationExperienceGains[0] = 0;
+                                            break;
+                                        case 2697:
+                                            creationExperienceGains[0] = (int)param.Value;
+                                            break;
+                                        case 2698:
+                                            creationRequiredSkillIds[1] = (int)param.Value;
+                                            creationExperienceGains[1] = 0;
+                                            break;
+                                        case 2699:
+                                            creationExperienceGains[1] = (int)param.Value;
+                                            break;
+                                        case 2821:
+                                            IsMeleeArmour = (int)param.Value == 1;
+                                            break;
+                                        case 2822:
+                                            IsRangedArmour = (int)param.Value == 1;
+                                            break;
+                                        case 2823:
+                                            IsMagicArmour = (int)param.Value == 1;
+                                            break;
+                                        case 2825:
+                                            IsMeleeWeapon = (int)param.Value == 1;
+                                            break;
+                                        case 2826:
+                                            IsRangedWeapon = (int)param.Value == 1;
+                                            break;
+                                        case 2827:
+                                            IsMagicWeapon = (int)param.Value == 1;
+                                            break;
                                         case 2866:
-                                            EquipRatioRanged = (int)param.Value;
+                                            EquipRangedratio = (int)param.Value;
                                             break;
                                         case 2867:
-                                            EquipRatioMelee = (int)param.Value;
+                                            EquipMeleeRatio = (int)param.Value;
                                             break;
                                         case 2868:
-                                            EquipRatioMagic = (int)param.Value;
+                                            EquipMagicRatio = (int)param.Value;
                                             break;
                                         case 2870:
-                                            Armour = (int)param.Value;
+                                            ArmourBonus = (int)param.Value;
                                             break;
                                         case 2946:
                                             PrayerBonus = (int)param.Value;
+                                            break;
+                                        case 2951: //Required cooking level (old?)
                                             break;
                                         case 3267:
                                             MeleeAccuracy = (int)param.Value;
@@ -1058,10 +1556,16 @@ namespace NXTCacheReader
                                         case 3322:
                                             DiangoReplacementCost = (int)param.Value;
                                             break;
-                                        case 3324:
+                                        case 3324: //Death flag
+                                            break;
+                                        case 3382:
+                                            DegredationItemId = (int)param.Value;
                                             break;
                                         case 3383:
                                             RepairCost = (int)param.Value;
+                                            break;
+                                        case 3385:
+                                            MaxCharges = (int)param.Value;
                                             break;
                                         case 4085:
                                             TreasureHunterText = (string)param.Value;
@@ -1069,7 +1573,7 @@ namespace NXTCacheReader
                                         case 4199:
                                             TreasureHunterCashOutValue = (int)param.Value;
                                             break;
-                                        case 4749:
+                                        case 4749: //Treasure Hunter struct ID
                                             break;
                                         case 5417:
                                             DestroyText = (string)param.Value;
@@ -1083,24 +1587,31 @@ namespace NXTCacheReader
 
                                     }
                                 }
+                                BankActions = actions.Where(a => a != null).ToArray();
+                                CreationExperienceQuantities = creationExperienceGains.Where(i => i != -1).ToArray();
+                                CreationRequiredItemIds = creationRequiredItemIds.Where(i => i != -1).ToArray();
+                                CreationRequiredItemQuantities = creationRequiredItemQuantities.Where(i => i != -1).ToArray();
+                                CreationRequiredSkillIds = creationRequiredSkillIds.Where(i => i != -1).ToArray();
+                                CreationRequiredToolItemIds = creationRequiredToolItemIds.Where(i => i != -1).ToArray();
+                                EquipActions = equipActions.Where(a => a != null).ToArray();
+                                EquipRequiredSkillIds = equipRequiredSkillIds.Where(i => i != -1).ToArray();
+                                EquipRequiredSkillLevels = equipRequiredSkillLevels.Where(i => i != -1).ToArray();
                                 break;
                         }
                     }
                     Actions = actions.Where(a => a != null).ToArray();
-                    bankActions = actions.Where(a => a != null).ToArray();
                     GroundActions = groundActions.Where(a => a != null).ToArray();
-                    EquipActions = equipActions.Where(a => a != null).ToArray();
                     if (CosmeticTemplateId != -1)
                     {
-                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(CosmeticId));
+                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(CosmeticItemId));
                     }
                     if (LentTemplateId != -1)
                     {
-                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(LentId));
+                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(LentItemId));
                     }
                     if (NoteTemplateId != -1)
                     {
-                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(NoteId));
+                        CopyFromTemplate(cacheReader.LoadDefinition<Item>(NoteItemId));
                     }
                 }
             }
@@ -1110,7 +1621,7 @@ namespace NXTCacheReader
                 Actions = template.Actions;
                 DestroyText = template.DestroyText;
                 IsMembers = template.IsMembers;
-                IsTradeable = template.IsTradeable;
+                IsTradable = template.IsTradable;
                 Name = template.Name;
             }
 
