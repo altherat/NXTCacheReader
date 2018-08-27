@@ -126,7 +126,7 @@ Currently only some of the cache is recognized and supported.
 - Name
 - Width
 
-##### Widgets
+##### Interface Components
 - Actions
 - Animation ID
 - Base height
