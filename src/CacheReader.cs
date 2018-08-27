@@ -12,6 +12,7 @@ namespace NXTCacheReader
 
         private readonly Dictionary<Type, int> CACHE_INDEXES = new Dictionary<Type, int>()
         {
+            { typeof(Definition.Widget), 3 },
             { typeof(Definition.Object), 16 },
             { typeof(Definition.Npc), 18 },
             { typeof(Definition.Item), 19 }
@@ -141,22 +142,24 @@ namespace NXTCacheReader
                     record.Bytes = blobBytes;
                     using (MemoryStream blobStream = new MemoryStream(blobBytes))
                     {
-                        blobStream.Position = 1;
-                        int nextPosition = -1;
-                        foreach (int id in record.Ids)
+                        if (ReadByte(blobStream) == 1)
                         {
-                            int actualId = (recordKey << 8) + id;
-                            int startPosition = nextPosition == -1 ? ReadInt(blobStream) : nextPosition;
-                            nextPosition = ReadInt(blobStream);
-                            long prevPosition = blobStream.Position;
-                            blobStream.Position = startPosition;
-                            byte[] bytes = new byte[nextPosition - startPosition];
-                            blobStream.Read(bytes, 0, bytes.Length);
-                            T definition = (T)Activator.CreateInstance(typeof(T), new object[] { actualId });
-                            definition.Deserialize(this, bytes);
-                            loadedDefinitions[actualId] = definition;
-                            definitions.Add(actualId, definition);
-                            blobStream.Position = prevPosition;
+                            int nextPosition = -1;
+                            foreach (int id in record.Ids)
+                            {
+                                int actualId = (recordKey << 8) + id;
+                                int startPosition = nextPosition == -1 ? ReadInt(blobStream) : nextPosition;
+                                nextPosition = ReadInt(blobStream);
+                                long prevPosition = blobStream.Position;
+                                blobStream.Position = startPosition;
+                                byte[] bytes = new byte[nextPosition - startPosition];
+                                blobStream.Read(bytes, 0, bytes.Length);
+                                T definition = (T)Activator.CreateInstance(typeof(T), new object[] { actualId });
+                                definition.Deserialize(this, bytes);
+                                loadedDefinitions[actualId] = definition;
+                                definitions[actualId] = definition;
+                                blobStream.Position = prevPosition;
+                            }
                         }
                     }
                 }
