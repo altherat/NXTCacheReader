@@ -168,3 +168,6 @@ Currently only some of the cache is recognized and supported.
 - Sub-menu IDs
 - Sub-option IDs
 - Text
+
+##### World Map
+- Location text
