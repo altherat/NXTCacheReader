@@ -12,10 +12,11 @@ namespace NXTCacheReader
 
         private readonly Dictionary<Type, int> CACHE_INDEXES = new Dictionary<Type, int>()
         {
-            { typeof(Definition.Widget), 3 },
+            { typeof(Definition.Component), 3 },
             { typeof(Definition.Object), 16 },
             { typeof(Definition.Npc), 18 },
-            { typeof(Definition.Item), 19 }
+            { typeof(Definition.Item), 19 },
+            { typeof(Definition.QuickChat), 24 }
         };
         private const int FLAG_IDENTIFIERS = 0x1;
         private const int FLAG_WHIRLPOOL = 0x2;
@@ -166,7 +167,7 @@ namespace NXTCacheReader
             }
             return definitions;
         }
-
+      
         private T ReadDefinition<T>(Type type, int id, Record record) where T : Definition
         {
             using (MemoryStream stream = new MemoryStream(record.Bytes))
