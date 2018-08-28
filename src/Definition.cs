@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +16,210 @@ namespace NXTCacheReader
 
         internal abstract void Deserialize(CacheReader cacheReader, byte[] bytes);
 
-        public class Widget : Definition
+        public class Quest : Definition
+        {
+
+            public byte AwardedQuestPoints;
+            public byte DifficultyId;
+            public bool IsMembers;
+            public string JournalCombatText;
+            public string JournalName;
+            public string JournalRequiredItemsText;
+            public string JournalRewardsText;
+            public int JournalSpriteId;
+            public string JournalStartingPointText;
+            public string Name;
+            public ushort[] RequiredQuestIds;
+            public ushort RequiredQuestPoints;
+            public byte[] RequiredSkillIds;
+            public byte[] RequiredSkillLevels;
+
+            public Quest(int id) : base(id)
+            {
+            }
+
+            internal override void Deserialize(CacheReader cacheReader, byte[] bytes)
+            {
+                using (MemoryStream stream = new MemoryStream(bytes))
+                {
+                    while (stream.Position < stream.Length)
+                    {
+                        byte opcode = cacheReader.ReadUByte(stream);
+                        switch (opcode)
+                        {
+                            case 1:
+                                Name = cacheReader.ReadJagexString(stream);
+                                break;
+                            case 2:
+                                string unknown1 = cacheReader.ReadJagexString(stream);
+                                break;
+                            case 3:
+                                int size = cacheReader.ReadUByte(stream);
+                                ushort[] configId = new ushort[size];
+                                int[] configStartValue = new int[size];
+                                int[] configEndValue = new int[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    configId[i] = cacheReader.ReadUShort(stream);
+                                    configStartValue[i] = cacheReader.ReadInt(stream);
+                                    configEndValue[i] = cacheReader.ReadInt(stream);
+                                }
+                                break;
+                            case 4:
+                                size = cacheReader.ReadUByte(stream);
+                                ushort[] scriptId = new ushort[size];
+                                int[] scriptStartValue = new int[size];
+                                int[] scriptEndValue = new int[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    scriptId[i] = cacheReader.ReadUShort(stream);
+                                    scriptStartValue[i] = cacheReader.ReadInt(stream);
+                                    scriptEndValue[i] = cacheReader.ReadInt(stream);
+                                }
+                                break;
+                            case 5:
+                                ushort unknown2 = cacheReader.ReadUShort(stream);
+                                break;
+                            case 6:
+                                byte unknown3 = cacheReader.ReadUByte(stream);
+                                break;
+                            case 7:
+                                DifficultyId = cacheReader.ReadUByte(stream);
+                                break;
+                            case 8:
+                                IsMembers = true;
+                                break;
+                            case 9:
+                                AwardedQuestPoints = cacheReader.ReadUByte(stream);
+                                break;
+                            case 10:
+                                size = cacheReader.ReadUByte(stream);
+                                int[] unknown4 = new int[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    unknown4[i] = cacheReader.ReadInt(stream);
+                                }
+                                break;
+                            case 12:
+                                int unknown5 = cacheReader.ReadInt(stream);
+                                break;
+                            case 13:
+                                size = cacheReader.ReadUByte(stream);
+                                RequiredQuestIds = new ushort[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    RequiredQuestIds[i] = cacheReader.ReadUShort(stream);
+                                }
+                                break;
+                            case 14:
+                                size = cacheReader.ReadUByte(stream);
+                                RequiredSkillIds = new byte[size];
+                                RequiredSkillLevels = new byte[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    RequiredSkillIds[i] = cacheReader.ReadUByte(stream);
+                                    RequiredSkillLevels[i] = cacheReader.ReadUByte(stream);
+                                }
+                                break;
+                            case 15:
+                                RequiredQuestPoints = cacheReader.ReadUShort(stream);
+                                break;
+                            case 17:
+                                int icon = cacheReader.ReadBigSmart(stream);
+                                break;
+                            case 18:
+                                size = cacheReader.ReadUByte(stream);
+                                int[] unknown6 = new int[size];
+                                int[] unknown7 = new int[size];
+                                int[] unknown8 = new int[size];
+                                string[] unknown9 = new string[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    unknown6[i] = cacheReader.ReadInt(stream);
+                                    unknown7[i] = cacheReader.ReadInt(stream);
+                                    unknown8[i] = cacheReader.ReadInt(stream);
+                                    unknown9[i] = cacheReader.ReadString(stream);
+                                }
+                                break;
+                            case 19:
+                                size = cacheReader.ReadUByte(stream);
+                                int[] unknown10 = new int[size];
+                                int[] unknown11 = new int[size];
+                                int[] unknown12 = new int[size];
+                                string[] unknown13 = new string[size];
+                                for (int i = 0; i < size; i++)
+                                {
+                                    unknown10[i] = cacheReader.ReadInt(stream);
+                                    unknown11[i] = cacheReader.ReadInt(stream);
+                                    unknown12[i] = cacheReader.ReadInt(stream);
+                                    unknown13[i] = cacheReader.ReadString(stream);
+                                }
+                                break;
+                            case 249:
+                                foreach (KeyValuePair<int, object> param in cacheReader.Decode249(stream))
+                                {
+                                    switch (param.Key)
+                                    {
+                                        case 845:
+                                            JournalName = (string)param.Value;
+                                            break;
+                                        case 948:
+                                            JournalStartingPointText = (string)param.Value;
+                                            break;
+                                        case 949:
+                                            JournalRequiredItemsText = (string)param.Value;
+                                            break;
+                                        case 950:
+                                            JournalCombatText = (string)param.Value;
+                                            break;
+                                        case 951:
+                                            JournalRewardsText = (string)param.Value;
+                                            break;
+                                        case 952:
+                                            JournalSpriteId = (int)param.Value;
+                                            break;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        public class WorldMap : Definition
+        {
+
+            public string LocationText;
+
+            public WorldMap(int id) : base(id)
+            {
+            }
+
+            internal override void Deserialize(CacheReader cacheReader, byte[] bytes)
+            {
+                using (MemoryStream stream = new MemoryStream(bytes))
+                {
+                    while (stream.Position < stream.Length)
+                    {
+                        int unknown1 = cacheReader.ReadUByte(stream);
+                        switch (unknown1)
+                        {
+                            case 3:
+                                LocationText = cacheReader.ReadString(stream);
+                                break;
+                            case 19:
+                                break;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        public class Component : Definition
         {
 
             public string[] Actions;
@@ -40,7 +242,7 @@ namespace NXTCacheReader
             public int TextColor;
             public int Type;
 
-            public Widget(int id) : base(id)
+            public Component(int id) : base(id)
             {
             }
 
@@ -1623,6 +1825,71 @@ namespace NXTCacheReader
                 IsMembers = template.IsMembers;
                 IsTradable = template.IsTradable;
                 Name = template.Name;
+            }
+
+        }
+
+        public class QuickChat : Definition
+        {
+
+            public bool IsMenu;
+            public int[] SubMenuIds;
+            public int[] SubOptionIds;
+            public string Text;
+
+            public QuickChat(int id) : base(id)
+            {
+                IsMenu = id < 256;
+            }
+
+            internal override void Deserialize(CacheReader cacheReader, byte[] bytes)
+            {
+                using (MemoryStream stream = new MemoryStream(bytes))
+                {
+                    while (stream.Position < stream.Length)
+                    {
+                        int unknown1 = cacheReader.ReadByte(stream);
+                        if (unknown1 == 4)
+                        {
+                            int unknown2 = cacheReader.ReadByte(stream);
+                        }
+                        Text = cacheReader.ReadString(stream);
+                        byte unknown3 = cacheReader.ReadByte(stream);
+                        if (unknown3 == 2)
+                        {
+                            byte count = cacheReader.ReadByte(stream);
+                            if (IsMenu)
+                            {
+                                SubMenuIds = new int[count];
+                                for (int i = 0; i < count; i++)
+                                {
+                                    SubMenuIds[i] = cacheReader.ReadUShort(stream);
+                                    byte unknown5 = cacheReader.ReadByte(stream);
+                                }
+                                unknown3 = cacheReader.ReadByte(stream);
+                            }
+                            else
+                            {
+                                SubOptionIds = new int[count];
+                                for (int i = 0; i < count; i++)
+                                {
+                                    SubOptionIds[i] = cacheReader.ReadUShort(stream) + 256;
+                                }
+                            }
+                        }
+                        if (unknown3 == 3)
+                        {
+                            byte count = cacheReader.ReadByte(stream);
+                            SubOptionIds = new int[count];
+                            for (int i = 0; i < count; i++)
+                            {
+                                SubOptionIds[i] = cacheReader.ReadShort(stream) + 256;
+                                byte unknown4 = cacheReader.ReadUByte(stream);
+                            }
+                        }
+                        break;
+                    }
+                }
             }
 
         }
