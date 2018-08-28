@@ -146,3 +146,9 @@ Currently only some of the cache is recognized and supported.
 - Text
 - Textcolor
 - Type
+
+##### Quick Chat
+- Is menu
+- Sub-menu IDs
+- Sub-option IDs
+- Text
