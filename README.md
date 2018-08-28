@@ -147,6 +147,22 @@ Currently only some of the cache is recognized and supported.
 - Textcolor
 - Type
 
+##### Quests
+- Awarded quest points
+- Difficulty ID
+- Is members
+- Journal combat text
+- Journal name
+- Journal required items text
+- Journal rewards text
+- Journal sprite ID
+- Journal starting point text
+- Name
+- Required quest IDs
+- Required quest points
+- Required skill IDs
+- Required skill levels
+
 ##### Quick Chat
 - Is menu
 - Sub-menu IDs
