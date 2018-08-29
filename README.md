@@ -13,8 +13,8 @@ CacheReader cacheReader = new CacheReader(@"C:\ProgramData\Jagex\RuneScape");
 #### Examples
 ##### Read a single item definition from the cache and print the name
 ```
-Definition.Item bluePartyhat = cacheReader.LoadDefinition<Definition.Item>(1042);
-Console.WriteLine(bluePartyhat.Name);
+Definition.Item itemDefinition = cacheReader.LoadDefinition<Definition.Item>(1042);
+Console.WriteLine(itemDefinition.Name);
 ```
 Output:
 ```
