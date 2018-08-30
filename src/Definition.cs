@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace NXTCacheReader
+namespace NXTTools
 {
     public abstract class Definition
     {
@@ -1260,6 +1260,7 @@ namespace NXTCacheReader
         {
 
             public string[] Actions;
+            public int AugmentedItemId = -1;
             public int ArmourBonus = -1;
             public int AttackSpeed = -1;
             public string[] BankActions;
@@ -1313,6 +1314,7 @@ namespace NXTCacheReader
             public int ModelId = -1;
             public int ModelZoom = -1;
             public string Name;
+            public int NonAugmentedItemId = -1;
             public int NoteItemId = -1;
             public int NoteTemplateId = -1;
             public int PrayerBonus = -1;
@@ -1779,6 +1781,12 @@ namespace NXTCacheReader
                                             break;
                                         case 5417:
                                             DestroyText = (string)param.Value;
+                                            break;
+                                        case 5525:
+                                            NonAugmentedItemId = (int)param.Value;
+                                            break;
+                                        case 5551:
+                                            AugmentedItemId = (int)param.Value;
                                             break;
                                         case 6712:
                                             equipActions[5] = (string)param.Value;
