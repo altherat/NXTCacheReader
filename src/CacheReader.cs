@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace NXTTools
+namespace NXTCacheReader
 {
     public abstract class Definition
     {
