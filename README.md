@@ -40,6 +40,7 @@ Currently only some of the cache is recognized and supported.
 - Actions
 - Armour bonus
 - Attack speed
+- Augmented item ID
 - Bank actions
 - Consumption life points quantity
 - Cosmetic item ID
@@ -90,6 +91,7 @@ Currently only some of the cache is recognized and supported.
 - Model ID
 - Model zoom
 - Name
+- Non-augmented item ID
 - Note item ID
 - Note template ID
 - Prayer bonus
