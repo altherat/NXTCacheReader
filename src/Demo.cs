@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NXTCacheReader
 {
-    class Program
+    class Demo
     {
 
         private static CacheReader cacheReader;
