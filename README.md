@@ -3,8 +3,8 @@ A simple C# program to help read the RuneScape NXT client cache files
 
 ## Usage
 
-1. Download, install and run the RuneScape NXT client from the official website
-2. Let the client download the cache. By default, the location of the cache will be in C:\ProgramData\Jagex\Runescape
+1. Download, install and run the RuneScape NXT client from the official website.
+2. Let the client download the cache. By default, the location of the cache will be in C:\ProgramData\Jagex\Runescape but this location is not guaranteed as it can be changed in the client's options.
 3. Create the CacheReader object with the cache's path:
 ```
 CacheReader cacheReader = new CacheReader(@"C:\ProgramData\Jagex\RuneScape");
