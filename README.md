@@ -136,6 +136,7 @@ Currently only some of the cache is recognized and supported.
 - Base position Y
 - Base width
 - Content type
+- ID as child
 - Is hidden
 - Is hover disabled
 - Parent ID
@@ -148,6 +149,7 @@ Currently only some of the cache is recognized and supported.
 - Text
 - Textcolor
 - Type
+- Widget ID
 
 ##### Quests
 - Awarded quest points
