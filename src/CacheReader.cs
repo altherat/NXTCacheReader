@@ -4,7 +4,7 @@ using System.Data.SQLite;
 using System.IO;
 using zlib;
 
-namespace NXTCacheReader
+namespace NXTTools
 {
 
     public class CacheReader
@@ -13,13 +13,13 @@ namespace NXTCacheReader
         private const string DEFAULT_CACHE_DIRECTORY = @"C:\ProgramData\Jagex\RuneScape";
         private readonly Dictionary<Type, Index> CACHE_INDEXES = new Dictionary<Type, Index>()
         {
-            { typeof(Definition.Quest), new Index(2, 35) },
-            { typeof(Definition.WorldMap), new Index(2, 36) },
-            { typeof(Definition.Component), new Index(3, -1) },
-            { typeof(Definition.Object), new Index(16, -1) },
-            { typeof(Definition.Npc), new Index(18, -1) },
-            { typeof(Definition.Item), new Index(19, -1) },
-            { typeof(Definition.QuickChat), new Index(24, -1) }
+            { typeof(Definition.Quest), new Index(2, 35, 8) },
+            { typeof(Definition.WorldMap), new Index(2, 36, 8) },
+            { typeof(Definition.Component), new Index(3, -1, 8) },
+            { typeof(Definition.Object), new Index(16, -1, 8) },
+            { typeof(Definition.Npc), new Index(18, -1, 7) },
+            { typeof(Definition.Item), new Index(19, -1, 8) },
+            { typeof(Definition.QuickChat), new Index(24, -1, 8) }
         };
         private const int FLAG_IDENTIFIERS = 0x1;
         private const int FLAG_WHIRLPOOL = 0x2;
@@ -28,7 +28,7 @@ namespace NXTCacheReader
         private const int WHIRLPOOL_SIZE = 64;
         private static readonly char[] SPECIAL_CHARACTERS = { '\u20AC', '\0', '\u201A', '\u0192', '\u201E', '\u2026', '\u2020', '\u2021', '\u02C6', '\u2030', '\u0160', '\u2039', '\u0152', '\0', '\u017D', '\0', '\0', '\u2018', '\u2019', '\u201C', '\u201D', '\u2022', '\u2013', '\u2014', '\u02DC', '\u2122', '\u0161', '\u203A', '\u0153', '\0', '\u017E', '\u0178' };
 
-        private string CacheDirectory;
+        private readonly string CacheDirectory;
         private Dictionary<Type, Dictionary<int, Record>> Records = new Dictionary<Type, Dictionary<int, Record>>();
         private Dictionary<Type, Dictionary<int, object>> LoadedDefinitions = new Dictionary<Type, Dictionary<int, object>>();
 
@@ -37,55 +37,19 @@ namespace NXTCacheReader
             CacheDirectory = cacheDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
         }
 
-        public T LoadDefinition<T>(int id) where T : Definition
-        {
-            Type type = typeof(T);
-            Dictionary<int, object> definitions;
-            if (LoadedDefinitions.TryGetValue(type, out definitions))
-            {
-                object definition;
-                if (!definitions.TryGetValue(id, out definition))
-                {
-                    definition = TryReadDefinition<T>(id);
-                    definitions.Add(id, definition);
-                }
-                return (T)definition;
-            }
-            else
-            {
-                T definition = TryReadDefinition<T>(id);
-                LoadedDefinitions[type] = new Dictionary<int, object>()
-                {
-                    {id, definition }
-                };
-                return definition;
-            }
-        }
-
-        public Dictionary<int, T> LoadDefinitions<T>(params int[] ids) where T : Definition
-        {
-            Dictionary<int, T> definitions = new Dictionary<int, T>();
-            foreach (int id in ids)
-            {
-                definitions.Add(id, LoadDefinition<T>(id));
-            }
-            return definitions;
-        }
-
         public Dictionary<int, T> LoadDefinitions<T>() where T : Definition
         {
             Type type = typeof(T);
             Index index = CACHE_INDEXES[typeof(T)];
-            int recordId = index.RecordId;
+            int idNumBits = index.IdNumBits;
+            int recordKey = index.RecordKey;
             Dictionary<int, T> definitions = new Dictionary<int, T>();
-            Dictionary<int, object> loadedDefinitions;
-            if (!LoadedDefinitions.TryGetValue(type, out loadedDefinitions))
+            if (!LoadedDefinitions.TryGetValue(type, out Dictionary<int, object> loadedDefinitions))
             {
                 loadedDefinitions = new Dictionary<int, object>();
                 LoadedDefinitions[type] = loadedDefinitions;
             }
-            Dictionary<int, Record> records;
-            if (!Records.TryGetValue(type, out records))
+            if (!Records.TryGetValue(type, out Dictionary<int, Record> records))
             {
                 records = new Dictionary<int, Record>();
                 Records[type] = records;
@@ -126,9 +90,9 @@ namespace NXTCacheReader
                         {
                             records[key] = new Record(new List<int>(ReadSmart(stream, 2, 4, false)));
                         }
-                        foreach (Record record in records.Values)
+                        foreach (int key in recordKeys)
                         {
-                            List<int> ids = record.Ids;
+                            List<int> ids = records[key].Ids;
                             foreach (int id in DecodeIds(stream, ids.Capacity))
                             {
                                 ids.Add(id);
@@ -138,22 +102,22 @@ namespace NXTCacheReader
                     
                 }
                 reader.Close();
-                command.CommandText = "SELECT KEY, DATA FROM cache" + (recordId == -1 ? "" : " WHERE KEY = " + recordId);
+                command.CommandText = "SELECT KEY, DATA FROM cache" + (recordKey == -1 ? "" : " WHERE KEY = " + recordKey);
                 reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    int recordKey = reader.GetInt32(0);
-                    byte[] blobBytes = DecompressBlob((byte[])reader[1]);
-                    Record record = records[recordKey];
-                    record.Bytes = blobBytes;
-                    using (MemoryStream blobStream = new MemoryStream(blobBytes))
+                    int currentRecordKey = reader.GetInt32(0);
+                    if (records.TryGetValue(currentRecordKey, out Record record))
                     {
-                        if (ReadByte(blobStream) == 1)
+                        byte[] blobBytes = DecompressBlob((byte[])reader[1]);
+                        record.Bytes = blobBytes;
+                        using (MemoryStream blobStream = new MemoryStream(blobBytes))
                         {
+                            blobStream.Position = 1;
                             int nextPosition = -1;
                             foreach (int id in record.Ids)
                             {
-                                int actualId = recordId == -1 ? (recordKey << 8) + id : id;
+                                int actualId = recordKey == -1 ? (currentRecordKey << idNumBits) + id : id;
                                 int startPosition = nextPosition == -1 ? ReadInt(blobStream) : nextPosition;
                                 nextPosition = ReadInt(blobStream);
                                 long prevPosition = blobStream.Position;
@@ -173,11 +137,69 @@ namespace NXTCacheReader
             return definitions;
         }
 
-        private T ReadDefinition<T>(Type type, int id, Record record) where T : Definition
+        public Dictionary<int, T> LoadDefinitions<T>(params int[] ids) where T : Definition
+        {
+            Dictionary<int, T> definitions = new Dictionary<int, T>();
+            foreach (int id in ids)
+            {
+                definitions.Add(id, LoadDefinition<T>(id));
+            }
+            return definitions;
+        }
+
+        public T LoadDefinition<T>(int id) where T : Definition
+        {
+            Type type = typeof(T);
+            if (LoadedDefinitions.TryGetValue(type, out Dictionary<int, object> definitions))
+            {
+                if (!definitions.TryGetValue(id, out object definition))
+                {
+                    definition = TryReadDefinition<T>(id);
+                    definitions.Add(id, definition);
+                }
+                return (T)definition;
+            }
+            else
+            {
+                T definition = TryReadDefinition<T>(id);
+                LoadedDefinitions[type] = new Dictionary<int, object>()
+                {
+                    {id, definition }
+                };
+                return definition;
+            }
+        }
+
+        private T TryReadDefinition<T>(int id) where T : Definition
+        {
+            Type type = typeof(T);
+            int idNumBits = CACHE_INDEXES[type].IdNumBits;
+            int recordKey = id >> idNumBits;
+            if (Records.TryGetValue(type, out Dictionary<int, Record> records))
+            {
+                if (!records.TryGetValue(recordKey, out Record record))
+                {
+                    record = ReadRecord(CACHE_INDEXES[type].FileId, recordKey);
+                    records[recordKey] = record;
+                }
+                return ReadDefinition<T>(type, id, record, idNumBits);
+            }
+            else
+            {
+                Record record = ReadRecord(CACHE_INDEXES[type].FileId, recordKey);
+                Records[type] = new Dictionary<int, Record>()
+                {
+                    { recordKey, record }
+                };
+                return ReadDefinition<T>(type, id, record, idNumBits);
+            }
+        }
+
+        private T ReadDefinition<T>(Type type, int id, Record record, int idNumBits) where T : Definition
         {
             using (MemoryStream stream = new MemoryStream(record.Bytes))
             {
-                stream.Position = 1 + (record.Ids.IndexOf(id & 0xFF)) * 4;
+                stream.Position = 1 + record.Ids.IndexOf(id & (1 << idNumBits) - 1) * 4;
                 int startPosition = ReadInt(stream);
                 int endPosition = ReadInt(stream);
                 stream.Position = startPosition;
@@ -189,7 +211,7 @@ namespace NXTCacheReader
             }
         }
 
-        private Record ReadRecord(int fileId, int recordId)
+        private Record ReadRecord(int fileId, int recordKey)
         {
             using (SQLiteConnection connection = new SQLiteConnection("Data Source=" + CacheDirectory + "js5-" + fileId + ".jcache;Version=3;"))
             {
@@ -228,8 +250,9 @@ namespace NXTCacheReader
                         {
                             recordIds[key] = new List<int>(ReadSmart(stream, 2, 4, false));
                         }
-                        foreach (List<int> ids in recordIds.Values)
+                        foreach (int key in recordKeys)
                         {
+                            List<int> ids = recordIds[key];
                             foreach (int id in DecodeIds(stream, ids.Capacity))
                             {
                                 ids.Add(id);
@@ -238,40 +261,14 @@ namespace NXTCacheReader
                     }
                 }
                 reader.Close();
-                command.CommandText = "SELECT DATA FROM cache WHERE KEY = " + recordId;
+                command.CommandText = "SELECT DATA FROM cache WHERE KEY = " + recordKey;
                 reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    return new Record(recordIds[recordId], DecompressBlob((byte[])reader[0]));
+                    return new Record(recordIds[recordKey], DecompressBlob((byte[])reader[0]));
                 }
             }
             return null;
-        }
-
-        private T TryReadDefinition<T>(int id) where T : Definition
-        {
-            Type type = typeof(T);
-            int recordKey = id >> 8;
-            Dictionary<int, Record> records;
-            if (Records.TryGetValue(type, out records))
-            {
-                Record record;
-                if (!records.TryGetValue(recordKey, out record))
-                {
-                    record = ReadRecord(CACHE_INDEXES[type].FileId, recordKey);
-                    records[recordKey] = record;
-                }
-                return ReadDefinition<T>(type, id, record);
-            }
-            else
-            {
-                Record record = ReadRecord(CACHE_INDEXES[type].FileId, recordKey);
-                Records[type] = new Dictionary<int, Record>()
-                {
-                    { recordKey, record }
-                };
-                return ReadDefinition<T>(type, id, record);
-            }
         }
 
         private static byte[] DecompressBlob(byte[] inData)
@@ -281,7 +278,7 @@ namespace NXTCacheReader
             using (ZOutputStream outZStream = new ZOutputStream(outStream))
             {
                 inStream.Seek(8, 0);
-                byte[] buffer = new byte[16 * 1024];
+                byte[] buffer = new byte[16384];
                 int len;
                 while ((len = inStream.Read(buffer, 0, buffer.Length)) > 0)
                 {
@@ -448,12 +445,14 @@ namespace NXTCacheReader
         {
 
             public int FileId;
-            public int RecordId;
+            public int RecordKey;
+            public int IdNumBits;
 
-            public Index(int fileId, int recordId)
+            public Index(int fileId, int recordKey, int idNumBits)
             {
                 FileId = fileId;
-                RecordId = recordId;
+                RecordKey = recordKey;
+                IdNumBits = idNumBits;
             }
 
         }
