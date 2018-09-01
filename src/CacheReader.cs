@@ -4,7 +4,7 @@ using System.Data.SQLite;
 using System.IO;
 using zlib;
 
-namespace NXTTools
+namespace NXTCacheReader
 {
 
     public class CacheReader
