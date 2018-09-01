@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace NXTCacheReader
+namespace NXTTools
 {
     public abstract class Definition
     {
@@ -229,6 +229,7 @@ namespace NXTCacheReader
             public short BasePositionY;
             public ushort BaseWidth;
             public ushort ContentType;
+            public int IdAsChild;
             public bool IsHidden;
             public bool IsHoverDisabled;
             public int ParentId;
@@ -241,10 +242,15 @@ namespace NXTCacheReader
             public string Text;
             public int TextColor;
             public int Type;
+            public int WidgetId;
 
             public Component(int id) : base(id)
             {
+                IdAsChild = id;
+                WidgetId = id >> 8;
             }
+
+            public static int GetId(int widgetId, int idAsChild) => (widgetId << 8) | idAsChild;
 
             internal override void Deserialize(CacheReader cacheReader, byte[] bytes)
             {
@@ -911,6 +917,7 @@ namespace NXTCacheReader
             public int MagicDamage = -1;
             public int MeleeAccuracy = -1;
             public int MeleeDamage = -1;
+            public int[] ModelIds;
             public string Name;
             public int RangedAccuracy = -1;
             public int RangedDamage = -1;
@@ -924,7 +931,6 @@ namespace NXTCacheReader
             {
                 using (MemoryStream stream = new MemoryStream(bytes))
                 {
-                    int[] modelIds = null;
                     string[] actions = new string[5];
                     while (stream.Position < stream.Length)
                     {
@@ -933,10 +939,10 @@ namespace NXTCacheReader
                         {
                             case 1:
                                 byte size = cacheReader.ReadUByte(stream);
-                                modelIds = new int[size];
+                                ModelIds = new int[size];
                                 for (int i = 0; i < size; i++)
                                 {
-                                    modelIds[i] = cacheReader.ReadBigSmart(stream);
+                                    ModelIds[i] = cacheReader.ReadBigSmart(stream);
                                 }
                                 break;
                             case 2:
@@ -1089,7 +1095,7 @@ namespace NXTCacheReader
                                 byte unknown119 = cacheReader.ReadUByte(stream);
                                 break;
                             case 121:
-                                byte[][] modelOffsets = new byte[modelIds.Length][];
+                                byte[][] modelOffsets = new byte[ModelIds.Length][];
                                 size = cacheReader.ReadByte(stream);
                                 for (int i = 0; i < size; i++)
                                 {
